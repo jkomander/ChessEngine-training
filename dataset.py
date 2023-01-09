@@ -20,7 +20,7 @@ class SparseBatch(ctypes.Structure):
         ('black_feature_values', ctypes.POINTER(ctypes.c_float))
     ]
 
-    def get_tensor(self, device):
+    def get_tensors(self, device):
         stm = torch.from_numpy(
             np.ctypeslib.as_array(self.stm, shape=(self.size, 1))
         ).pin_memory().to(device=device, non_blocking=True)

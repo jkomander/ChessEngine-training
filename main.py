@@ -15,7 +15,7 @@ def main():
     torch.manual_seed(0)
 
     sparse_batch_provider = dataset.SparseBatchProvider()
-    white_features, black_features, stm, score = sparse_batch_provider().contents.get_tensor(device)
+    white_features, black_features, stm, score = sparse_batch_provider().contents.get_tensors(device)
 
     model_ = model.NN().to(device)
 
