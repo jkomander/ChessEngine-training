@@ -4,7 +4,7 @@ import torch
 
 from constants import*
 
-lib_path = 'build/Release/training_data_loader.dll'
+lib_path = 'src/build/Release/training_data_loader.dll'
 lib = ctypes.cdll.LoadLibrary(lib_path)
 
 class SparseBatch(ctypes.Structure):
