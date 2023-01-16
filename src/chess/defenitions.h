@@ -41,7 +41,7 @@ namespace chess {
 
 	namespace rank {
 		constexpr Rank make(Square sq) {
-			return sq << 3;
+			return sq >> 3;
 		}
 	}
 

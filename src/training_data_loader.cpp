@@ -1,6 +1,5 @@
 #include<cassert>
 #include<numeric>
-#include<iostream>
 #include<vector>
 
 #include"chess/position.h"
@@ -76,7 +75,6 @@ namespace FeatureTransformer {
                     }
                 }
             }
-            std::cout << idx << " " << PIECE_INPUT_SIZE << "\n";
             assert(idx == PIECE_INPUT_SIZE);
         }
     }
