@@ -6,6 +6,7 @@ from constants import*
 
 lib_path = 'src/build/Release/training_data_loader.dll'
 lib = ctypes.cdll.LoadLibrary(lib_path)
+lib.init()
 
 class SparseBatch(ctypes.Structure):
     _fields_ = [
@@ -68,8 +69,6 @@ class SparseBatch(ctypes.Structure):
         black_features._coalesced_(True)
 
         return white_features, black_features, stm, score, game_result
-
-lib.init()
 
 lib.create_sparse_batch.restype = ctypes.POINTER(SparseBatch)
 lib.create_sparse_batch.argtypes = [ctypes.c_size_t]

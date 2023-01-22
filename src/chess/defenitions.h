@@ -9,46 +9,6 @@ namespace chess {
 	using File = uint8_t;
 	using Rank = uint8_t;
 
-	namespace color {
-		constexpr Color make(Piece pc) {
-			return pc >> 3;
-		}
-	}
-
-	namespace pieceType {
-		constexpr PieceType make(Piece pc) {
-			return pc & 7;
-		}
-	}
-
-	namespace piece {
-		constexpr Piece make(Color c, PieceType pt) {
-			return (c << 3) + pt;
-		}
-	}
-
-	namespace square {
-		constexpr Square make(File file, Rank rank) {
-			return (rank << 3) + file;
-		}
-	}
-
-	namespace file {
-		constexpr File make(Square sq) {
-			return sq & 7;
-		}
-	}
-
-	namespace rank {
-		constexpr Rank make(Square sq) {
-			return sq >> 3;
-		}
-	}
-
-	constexpr uint8_t distance(Square s1, Square s2) {
-		return std::max(std::abs(file::make(s1) - file::make(s2)), std::abs(rank::make(s1) - rank::make(s2)));
-	}
-
 	enum Colors {
 		WHITE,
 		BLACK,
@@ -119,5 +79,61 @@ namespace chess {
 		RANK_8,
 		N_RANKS
 	};
+
+	enum Directions {
+		NORTH = 8,
+		EAST = 1,
+		SOUTH = -NORTH,
+		WEST = -EAST,
+		NORTHEAST = NORTH + EAST,
+		NORTHWEST = NORTH + WEST,
+		SOUTHEAST = SOUTH + EAST,
+		SOUTHWEST = SOUTH + WEST,
+		N_DIRECTIONS = 8
+	};
+
+	namespace color {
+		constexpr Color make(Piece pc) {
+			return pc >> 3;
+		}
+	}
+
+	namespace pieceType {
+		constexpr PieceType make(Piece pc) {
+			return pc & 7;
+		}
+	}
+
+	namespace piece {
+		constexpr Piece make(Color c, PieceType pt) {
+			return (c << 3) + pt;
+		}
+	}
+
+	namespace square {
+		constexpr Square make(File file, Rank rank) {
+			return (rank << 3) + file;
+		}
+	}
+
+	namespace file {
+		constexpr File make(Square sq) {
+			return sq & 7;
+		}
+
+		char chars[N_FILES] = { 'a','b','c','d','e','f','g','h' };
+	}
+
+	namespace rank {
+		constexpr Rank make(Square sq) {
+			return sq >> 3;
+		}
+
+		char chars[N_RANKS] = { '1','2','3','4','5','6','7','8' };
+	}
+
+	constexpr uint8_t distance(Square s1, Square s2) {
+		return std::max(std::abs(file::make(s1) - file::make(s2)), std::abs(rank::make(s1) - rank::make(s2)));
+	}
 
 } // namespace chess

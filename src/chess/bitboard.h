@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#include<intrin.h>
+#endif
+
 #include"defenitions.h"
 
 namespace chess {
@@ -5,7 +9,7 @@ namespace chess {
 	struct Bitboard {
 		uint64_t data;
 
-		constexpr Bitboard() = default;
+		Bitboard() = default;
 		constexpr Bitboard(uint64_t data) :data(data) {}
 
 		constexpr static Bitboard fromSqure(Square sq) {
@@ -26,6 +30,47 @@ namespace chess {
 
 		constexpr void toggle(Square sq) {
 			data ^= (uint64_t)1 << sq;
+		}
+
+#ifdef _MSC_VER
+		int popcount() { return (int)_mm_popcnt_u64(data); }
+
+		Square LSB() {
+			unsigned long idx;
+			_BitScanForward64(&idx, data);
+			return Square(idx);
+		}
+
+		Square MSB() {
+			unsigned long idx;
+			_BitScanReverse64(&idx, data);
+			return Square(idx);
+		}
+
+#else
+		int popcount() {
+			return __builtin_popcountll(data);
+	}
+
+		Square LSB() {
+			return Square(__builtin_ctzll(data));
+		}
+
+		Square MSB() {
+			return Square(__builtin_clzll(data) ^ 63);
+		}
+#endif
+
+		Square popLSB() {
+			Square s = LSB();
+			data &= data - 1;
+			return s;
+		}
+
+		Square popMSB() {
+			Square s = MSB();
+			data &= data - 1;
+			return s;
 		}
 
 		constexpr friend Bitboard operator>>(Bitboard b, uint8_t shift) {

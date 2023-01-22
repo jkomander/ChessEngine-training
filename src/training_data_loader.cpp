@@ -1,5 +1,7 @@
+#include<algorithm> // std::sort
 #include<cassert>
 #include<numeric>
+#include<iostream>
 #include<vector>
 
 #include"chess/position.h"
@@ -18,6 +20,8 @@
 #endif
 
 using namespace chess;
+
+using IndexType = uint64_t;
 
 struct TrainingDataEntry {
     Position pos;
@@ -49,8 +53,7 @@ namespace FeatureTransformer {
     constexpr int HIDDEN_1_SIZE = 32;
     constexpr int HIDDEN_2_SIZE = 32;
 
-    using IndexType = uint16_t;
-    IndexType pieceIndices[N_COLORS][N_SQUARES][N_PIECES][N_SQUARES];
+    uint16_t pieceIndices[N_COLORS][N_SQUARES][N_PIECES][N_SQUARES];
 
     void init() {
         // initialize the index lookup table
@@ -79,11 +82,53 @@ namespace FeatureTransformer {
         }
     }
 
+    void fillFeatures(
+        IndexType i,
+        const TrainingDataEntry& e, 
+        Color c, 
+        IndexType* featureIndices, 
+        float* featureValues, 
+        IndexType& numActiveFeatures) 
+    {
+        const Position& pos = e.pos;
+
+        Square ksq = pos.kingSquare(c);
+        Bitboard occupied = pos.occupied & ~Bitboard::fromSqure(ksq);
+
+        IndexType active[MAX_ACTIVE_FEATURES];
+        IndexType size = 0;
+
+        while (occupied) {
+            Square s = occupied.popLSB();
+            active[size++] = pieceIndices[c][ksq][pos.piece(s)][s];
+        }
+
+        if (pos.canCastle()) {
+
+            IndexType offset = PIECE_INPUT_SIZE + ksq * MISC_SIZE;
+            if (pos.canCastle(CastlingRights::WHITE_QUEEN_SIDE)) active[size++] = offset;
+            if (pos.canCastle(CastlingRights::WHITE_KING_SIDE))  active[size++] = offset+1;
+            if (pos.canCastle(CastlingRights::BLACK_QUEEN_SIDE)) active[size++] = offset+2;
+            if (pos.canCastle(CastlingRights::BLACK_KING_SIDE))  active[size++] = offset+3;
+        }
+
+        if (pos.epSquare)
+            active[size++] = PIECE_INPUT_SIZE + ksq * MISC_SIZE + CASTLING_SIZE + file::make(pos.epSquare);
+
+        // sort the active feature indices
+        std::sort(active, active+size);
+
+        for (IndexType j = 0; j < size; ++j) {
+            IndexType idx = 2 * numActiveFeatures;
+            featureIndices[idx] = i;
+            featureIndices[idx+1] = active[j];
+            featureValues[numActiveFeatures++] = 1;
+        }
+    }
+
 } // namespace FeatureTransformer
 
 struct SparseBatch {
-    using IndexType = size_t;
-
     IndexType size;
     IndexType numActiveWhiteFeatures;
     IndexType numActiveBlackFeatures;
@@ -97,9 +142,9 @@ struct SparseBatch {
 
     SparseBatch() = default;
 
-    SparseBatch(std::vector<TrainingDataEntry>& entries) {
+    SparseBatch(const std::vector<TrainingDataEntry>& entries) {
         using namespace FeatureTransformer;
-        assert(size * MAX_ACTIVE_FEATURES * 2 <= std::numeric_limits<int64_t>::max());
+        assert(size * MAX_ACTIVE_FEATURES * 2 <= std::numeric_limits<IndexType>::max());
 
         size = entries.size();
         numActiveWhiteFeatures = 0;
@@ -112,25 +157,8 @@ struct SparseBatch {
         whiteFeatureValues = new float[size * MAX_ACTIVE_FEATURES];
         blackFeatureValues = new float[size * MAX_ACTIVE_FEATURES];
 
-        for (size_t i = 0; i < size; ++i) {
-            TrainingDataEntry& entry = entries[i];
-
-            stm[i] = (float)entry.pos.sideToMove;
-            score[i] = (float)entry.score;
-            gameResult[i] = ((float)entry.result+1)/2;
-
-            numActiveWhiteFeatures = 10*size;
-            numActiveBlackFeatures = numActiveWhiteFeatures;
-
-            for (size_t j = 0; j < 10; ++j) {
-                whiteFeatureIndices[2*(10*i+j)] = i;
-                blackFeatureIndices[2*(10*i+j)] = i;
-                whiteFeatureIndices[2*(10*i+j)+1] = j*1000;
-                blackFeatureIndices[2*(10*i+j)+1] = j*1000;
-                whiteFeatureValues[10*i+j] = 1;
-                blackFeatureValues[10*i+j] = 1;
-            }
-        }
+        for (IndexType i = 0; i < size; ++i)
+            fillEntry(i, entries[i]);
     }
 
     ~SparseBatch() {
@@ -142,12 +170,21 @@ struct SparseBatch {
         delete[] whiteFeatureValues;
         delete[] blackFeatureValues;
     }
+
+    void fillEntry(IndexType i, const TrainingDataEntry& e) {
+        stm[i] = (float)e.pos.sideToMove;
+        score[i] = (float)e.score;
+        gameResult[i] = ((float)e.result+1)/2;
+        FeatureTransformer::fillFeatures(i, e, WHITE, whiteFeatureIndices, whiteFeatureValues, numActiveWhiteFeatures);
+        FeatureTransformer::fillFeatures(i, e, BLACK, blackFeatureIndices, blackFeatureValues, numActiveBlackFeatures);
+    }
 };
 
 extern "C" {
 
     EXPORT void CDECL init() {
         FeatureTransformer::init();
+        Position::init();
     }
 
     EXPORT SparseBatch* CDECL create_sparse_batch(size_t batch_size) {
