@@ -50,3 +50,12 @@ class NN(torch.nn.Module):
         out = self.linear_out(in_out)
 
         return out
+
+def score_to_wdl(score):
+    return (score / WDL_SCALE).sigmoid
+
+def loss_fn(pred, game_result):
+    game_result = score_to_wdl(game_result)
+    pred = score_to_wdl(pred)
+    loss = torch.pow(torch.abs(game_result - pred), LOSS_EXPONENT).mean()
+    return loss

@@ -28,4 +28,11 @@ WEIGHT_MIN_HIDDEN_1    = -WEIGHT_MAX_HIDDEN_1
 WEIGHT_MIN_HIDDEN_2    = -WEIGHT_MAX_HIDDEN_2
 WEIGHT_MIN_OUT         = -WEIGHT_MAX_OUT
 
+# score-space to float-space
 OUTPUT_SCALE = 301
+
+# loss function
+LOSS_EXPONENT = 2.5
+
+# score-space to WDL-space conversion
+WDL_SCALE = 360
