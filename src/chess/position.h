@@ -111,6 +111,8 @@ namespace chess {
 			const FenTableEntry& e = fenTable[fen[idx]];
 			if (e.setPiece) {
 				board[sq] = e.piece;
+				if (e.piece == WHITE_KING) ksq[WHITE] = sq;
+				else if (e.piece == BLACK_KING) ksq[BLACK] = sq;
 				occupied.set(sq);
 			}
 			sq += e.skip;
