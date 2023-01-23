@@ -1,4 +1,6 @@
-#include<stdint.h>
+#include<algorithm> // std::max
+#include<cstdlib> // std::abs
+#include<cstdint>
 
 namespace chess {
 

@@ -1,11 +1,23 @@
 import ctypes
+import glob
 import numpy as np
+import os
+import sys
 import torch
 
 from constants import*
 
-lib_path = 'src/build/Release/training_data_loader.dll'
-lib = ctypes.cdll.LoadLibrary(lib_path)
+# Default Visual Studio path
+libpath = os.path.abspath('build/Release/training_data_loader.dll')
+
+if not os.path.isfile(libpath):
+    local_libpath = [n for n in glob.glob('./*training_data_loader.*') if n.endswith('.so') or n.endswith('.dll') or n.endswith('.dylib')]
+    if not local_libpath:
+        print('Cannot find training_data_loader shared library.')
+        sys.exit(1)
+    libpath = os.path.abspath(local_libpath[0])
+
+lib = ctypes.cdll.LoadLibrary(libpath)
 lib.init()
 
 class SparseBatch(ctypes.Structure):
@@ -82,3 +94,19 @@ class SparseBatchProvider():
 
     def __call__(self):
         return self.sparse_batch
+
+class FixedSizeDataset(torch.utils.data.Dataset):
+    def __init__(self, data, size):
+        super().__init__()
+        self.data = data
+        self.size = size
+    
+    def __len__(self):
+        return self.size
+
+    def __getitem__(self, index):
+        return self.data[0][index], self.data[1][index], self.data[2][index], self.data[3][index], self.data[4][index]
+
+class SparseBatchDataset(torch.utils.data.IterableDataset):
+    def __init__(self):
+        super().__init__()

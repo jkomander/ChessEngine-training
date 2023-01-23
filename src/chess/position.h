@@ -1,3 +1,4 @@
+#include<cstring> // std::memset
 #include<string>
 #include<sstream>
 
