@@ -5,10 +5,10 @@ PROJECT = training_data_loader
 LIB = $(PROJECT).so
 
 # Source files
-SRC = chess/bitboard.h chess/defenitions.h chess/position.h training_data_loader.cpp
+SRC = training_data_loader.cpp
 
 # Object files
-OBJS=$(subst .cpp,.o,$(SRC))
+OBJS = $(subst .cpp,.o,$(SRC))
 
 # High-level configuration
 debug = no
