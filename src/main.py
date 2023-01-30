@@ -6,6 +6,8 @@ import dataset
 import model
 
 def main():
+
+    '''
     num_positions = 2048
     batch_size = 1024
     num_epochs = 200
@@ -45,6 +47,7 @@ def main():
     end = time.time()
 
     print('Elapsed time:', end-begin)
+    '''
 
 if __name__ == '__main__':
     main()
