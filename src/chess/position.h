@@ -150,7 +150,7 @@ namespace chess {
 
 		// en passant target square
 		if (fen[idx] != '-') {
-			epSquare = square::make(file::chars[idx++], rank::chars[idx++]);
+			epSquare = square::make(file::CHARS[idx++], rank::CHARS[idx++]);
 		}
 
 		idx += 2;

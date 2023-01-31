@@ -123,7 +123,7 @@ namespace chess {
 			return sq & 7;
 		}
 
-		char chars[N_FILES] = { 'a','b','c','d','e','f','g','h' };
+		char CHARS[N_FILES] = { 'a','b','c','d','e','f','g','h' };
 	}
 
 	namespace rank {
@@ -131,10 +131,10 @@ namespace chess {
 			return sq >> 3;
 		}
 
-		char chars[N_RANKS] = { '1','2','3','4','5','6','7','8' };
+		char CHARS[N_RANKS] = { '1','2','3','4','5','6','7','8' };
 	}
 
-	constexpr uint8_t distance(Square s1, Square s2) {
+	inline uint8_t distance(Square s1, Square s2) {
 		return std::max(std::abs(file::make(s1) - file::make(s2)), std::abs(rank::make(s1) - rank::make(s2)));
 	}
 
