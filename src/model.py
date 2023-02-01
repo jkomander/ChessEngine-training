@@ -7,15 +7,15 @@ class NN(torch.nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.linear_white_accumulator = torch.nn.Linear(HALF_INPUT_SIZE, HALF_ACCUMULATOR_SIZE)
-        self.linear_black_accumulator = torch.nn.Linear(HALF_INPUT_SIZE, HALF_ACCUMULATOR_SIZE)
+        self.linear_white_accumulator = torch.nn.Linear(INPUT_HSIZE, ACCUMULATOR_HSIZE)
+        self.linear_black_accumulator = torch.nn.Linear(INPUT_HSIZE, ACCUMULATOR_HSIZE)
         self.linear_1 = torch.nn.Linear(ACCUMULATOR_SIZE, HIDDEN_1_SIZE)
         self.linear_2 = torch.nn.Linear(HIDDEN_1_SIZE, HIDDEN_2_SIZE)
         self.linear_out = torch.nn.Linear(HIDDEN_2_SIZE, OUTPUT_SIZE)
 
-        self._init_parameters()
+        self.init_parameters()
 
-    def _init_parameters(self):
+    def init_parameters(self):
         std = (2 / MAX_ACTIVE_FEATURES) ** 0.5
         torch.nn.init.normal_(self.linear_white_accumulator.weight, std=std)
         torch.nn.init.normal_(self.linear_black_accumulator.weight, std=std)
@@ -31,6 +31,9 @@ class NN(torch.nn.Module):
         torch.nn.init.kaiming_normal_(self.linear_out.weight)
         torch.nn.init.zeros_(self.linear_out.bias)
 
+        self.clamp()
+
+    def clamp(self):
         with torch.no_grad():
             self.linear_1.weight.clamp_(WEIGHT_MIN_HIDDEN_1, WEIGHT_MAX_HIDDEN_1)
             self.linear_2.weight.clamp_(WEIGHT_MIN_HIDDEN_2, WEIGHT_MAX_HIDDEN_2)
