@@ -193,7 +193,7 @@ extern "C" {
             entries.emplace_back();
             entries[i].pos = Position::startPosition();
             entries[i].score = -42;
-            entries[i].result = 0;
+            entries[i].result = (float)1/2;
         }
         return new SparseBatch(entries);
     }
