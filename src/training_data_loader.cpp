@@ -192,8 +192,8 @@ extern "C" {
         for (size_t i = 0; i < batch_size; ++i) {
             entries.emplace_back();
             entries[i].pos = Position::startPosition();
-            entries[i].score = -42;
-            entries[i].result = (float)1/2;
+            entries[i].score = 0;
+            entries[i].result = 1;
         }
         return new SparseBatch(entries);
     }
