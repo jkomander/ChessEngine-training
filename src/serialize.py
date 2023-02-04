@@ -76,10 +76,10 @@ class NNUE_Reader:
 
 def main():
     parser = argparse.ArgumentParser(description='Converts files between pt and nnue format')
-    parser.add_argument("source", help='Source file (can be .pt or .nnue)')
-    parser.add_argument("target", help='Target file (can be .pt or .nnue)')
-    
+    parser.add_argument('source', help='Source file (can be .pt or .nnue)')
+    parser.add_argument('target', help='Target file (can be .pt or .nnue)')
     args =  parser.parse_args()
+    
     print('Converting {} to {}'.format(args.source, args.target))
 
     if args.source.endswith('.nnue'):
@@ -91,7 +91,7 @@ def main():
         model_ = torch.load(args.source)
 
     else:
-        raise Exception('Invalid network output format')
+        raise Exception('Invalid network input format')
 
     if args.target.endswith('.nnue'):
         writer = NNUE_Writer(model_)
