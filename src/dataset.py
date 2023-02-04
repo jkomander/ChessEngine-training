@@ -107,6 +107,25 @@ class FixedSizeDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         return self.data[0][index], self.data[1][index], self.data[2][index], self.data[3][index], self.data[4][index]
 
+class Config:
+    def __init__(self, batch_size, device):
+        self.batch_size = batch_size
+        self.device = device
+
 class SparseBatchDataset(torch.utils.data.IterableDataset):
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        sparse_batch_provider = SparseBatchProvider(self.config.batch_size)
+
+        if sparse_batch_provider:
+            tensors = sparse_batch_provider().contents.get_tensors(self.config.device)
+            return tensors
+        
+        else:
+            raise StopIteration

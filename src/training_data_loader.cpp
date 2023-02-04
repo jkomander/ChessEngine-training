@@ -25,8 +25,8 @@ using IndexType = uint64_t;
 
 struct TrainingDataEntry {
     Position pos;
-    float score;
-    float result;
+    int16_t score;
+    int8_t result; // -1, 0, 1
 };
 
 namespace FeatureTransformer {
@@ -180,6 +180,18 @@ struct SparseBatch {
     }
 };
 
+struct SparseBatchStream {
+
+
+    SparseBatchStream(const char* file, size_t batchSize) {
+
+    }
+
+    SparseBatch next() {
+
+    }
+};
+
 extern "C" {
 
     EXPORT void CDECL init() {
@@ -187,9 +199,9 @@ extern "C" {
         Position::init();
     }
 
-    EXPORT SparseBatch* CDECL create_sparse_batch(size_t batch_size) {
+    EXPORT SparseBatch* CDECL create_sparse_batch(size_t batchSize) {
         std::vector<TrainingDataEntry>entries{};
-        for (size_t i = 0; i < batch_size; ++i) {
+        for (size_t i = 0; i < batchSize; ++i) {
             entries.emplace_back();
             entries[i].pos = Position::startPosition();
             entries[i].score = 0;
@@ -198,8 +210,20 @@ extern "C" {
         return new SparseBatch(entries);
     }
 
-    EXPORT void CDECL destroy_sparse_batch(SparseBatch* sparseBatch) {
-        delete sparseBatch;
+    EXPORT void CDECL destroy_sparse_batch(SparseBatch* batch) {
+        delete batch;
+    }
+
+    EXPORT SparseBatchStream* CDECL create_sparse_batch_stream(const char* file, size_t batchSize) {
+        return new SparseBatchStream(file, batchSize);
+    }
+
+    EXPORT void CDECL destroy_sparse_batch_stream(SparseBatchStream* stream) {
+        delete stream;
+    }
+
+    EXPORT SparseBatch CDECL next_sparse_batch(SparseBatchStream* stream) {
+        return stream->next();
     }
 
 } // extern "C"

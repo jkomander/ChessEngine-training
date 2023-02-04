@@ -42,3 +42,5 @@ LOSS_EXPONENT = 2.5
 
 # score-space to WDL-space conversion
 WDL_SCALE = 360
+
+MATE_SCORE = 32000
