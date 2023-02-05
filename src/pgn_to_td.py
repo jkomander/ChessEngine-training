@@ -4,7 +4,7 @@ import math
 import os
 import tqdm
 
-import constants
+from constants import*
 
 class PGN_Converter:
     def __init__(self, source, target):
@@ -42,6 +42,8 @@ class PGN_Converter:
             self.write_entry(fen, score, game_result)
 
     def write_entry(self, fen, score, game_result):
+        if abs(score) > MAX_EVAL_SCORE:
+            return
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='big'))
         self.buffer.extend(bytes(fen, 'utf-8'))
         self.buffer.extend(score.to_bytes(length=2, byteorder='big', signed=True))
@@ -71,7 +73,7 @@ class PGN_Converter:
         negative = score_str[0] == '-'
 
         if score_str[1] == 'M':
-            score = constants.MATE_SCORE - int(score_str[2:])
+            score = MATE_SCORE - int(score_str[2:])
         
         else:
             score = int(100 * float(score_str[1:]))
