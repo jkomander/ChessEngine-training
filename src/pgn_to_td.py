@@ -12,6 +12,7 @@ class PGN_Converter:
         self.target = target
         self.pgn = open(source)
         self.buffer = bytearray()
+        self.numInvalidScores = 0
 
     def convert(self):
         num_games = 0
@@ -30,6 +31,9 @@ class PGN_Converter:
                 self.process_game(game)
             else:
                 break
+            
+        if (self.numInvalidScores):
+            print('WARNING: Number of invalid scores: {}'.format(self.numInvalidScores))
 
     def process_game(self, game):
         game_result = __class__.game_result(game.headers['Result'])
@@ -43,6 +47,7 @@ class PGN_Converter:
 
     def write_entry(self, fen, score, game_result):
         if abs(score) > MAX_EVAL_SCORE:
+            self.numInvalidScores += 1
             return
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='big'))
         self.buffer.extend(bytes(fen, 'utf-8'))
