@@ -31,7 +31,7 @@ class PGN_Converter:
                 self.process_game(game)
             else:
                 break
-
+            
         if (self.numInvalidScores):
             print('WARNING: Number of invalid scores: {}.'.format(self.numInvalidScores))
 
@@ -41,18 +41,20 @@ class PGN_Converter:
 
         for node in game.mainline():
             score = __class__.score(node.comment)
+
+            if score == None or abs(score) > MAX_EVAL_SCORE and abs(score) < MIN_MATE_SCORE or abs(score) > MATE_SCORE:
+                self.numInvalidScores += 1
+                return
+        
             fen = node.board().fen()
 
             self.write_entry(fen, score, game_result)
 
     def write_entry(self, fen, score, game_result):
-        if abs(score) > MAX_EVAL_SCORE and abs(score) < MIN_MATE_SCORE or abs(score) > MATE_SCORE:
-            self.numInvalidScores += 1
-            return
-        self.buffer.extend(len(fen).to_bytes(length=1, byteorder='big'))
+        self.buffer.extend(len(fen).to_bytes(length=1, byteorder='little'))
         self.buffer.extend(bytes(fen, 'utf-8'))
-        self.buffer.extend(score.to_bytes(length=2, byteorder='big', signed=True))
-        self.buffer.extend(game_result.to_bytes(length=1, byteorder='big', signed=True))
+        self.buffer.extend(score.to_bytes(length=2, byteorder='little', signed=True))
+        self.buffer.extend(game_result.to_bytes(length=1, byteorder='little', signed=True))
 
     def write(self):
         with open(self.target, 'wb') as f:
@@ -71,9 +73,16 @@ class PGN_Converter:
 
     @staticmethod
     def score(str):
+        if (str[0] == '\n'):
+            str = str[1:]
+            
+        if not str.find('/'):
+            return None
+
         score_str = str.split('/')[0]
 
-        assert score_str[0] == '+' or score_str[0] == '-' or float(score_str) == 0
+        if not (score_str[0] == '+' or score_str[0] == '-' or float(score_str) == 0):
+            return None
 
         negative = score_str[0] == '-'
 
