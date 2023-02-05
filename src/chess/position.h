@@ -45,7 +45,7 @@ namespace chess {
 		inline static FenTableEntry fenTable[128];
 
 		Position() = default;
-		Position(const std::string& fen);
+		Position(const std::string_view& fen);
 
 		static Position startPosition() {
 			return Position(startFEN);
@@ -100,7 +100,7 @@ namespace chess {
 		fenTable['/'] = { false, {}, 2 * SOUTH };
 	}
 
-	Position::Position(const std::string& fen) {
+	Position::Position(const std::string_view& fen) {
 
 		std::memset(this, 0, sizeof(Position));
 		uint16_t idx = 0;
@@ -158,7 +158,7 @@ namespace chess {
 		// 50 move rule
 		if (fen[idx] != '-') {
 			auto len = fen.find_first_of(' ', idx);
-			auto numeric = std::stoi(fen.substr(idx, len));
+			auto numeric = std::stoi(std::string(fen.substr(idx, len)));
 			rule50Cnt = numeric;
 			idx = len - 1;
 		}
@@ -168,7 +168,7 @@ namespace chess {
 		// move counter
 		if (fen[idx] != '-') {
 			auto len = fen.find_first_of(' ', idx);
-			auto numeric = std::stoi(fen.substr(idx, len));
+			auto numeric = std::stoi(std::string(fen.substr(idx, len)));
 			ply = 2 * (numeric - 1) + sideToMove;
 			idx = len - 1;
 		}
