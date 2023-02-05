@@ -1,7 +1,6 @@
 import argparse
 import chess
 import chess.pgn
-import math
 import os
 import tqdm
 
