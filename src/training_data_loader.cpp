@@ -205,7 +205,7 @@ struct SparseBatchStream {
 
         // Open the file.
         std::ifstream is(this->file, std::ios::binary);
-        assert(is.is_open);
+        assert(is.is_open());
 
         // Determine the file size.
         is.seekg(0, std::ios::end);
