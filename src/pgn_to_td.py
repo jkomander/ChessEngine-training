@@ -47,8 +47,8 @@ class PGN_Converter:
                 self.numInvalidScores += 1
                 return
         
-            fen = node.board().fen()
-            self.write_entry(fen, score, game_result if node.turn() == chess.WHITE else - game_result)
+            fen = node.parent.board().fen()
+            self.write_entry(fen, score, game_result if node.parent.turn() == chess.WHITE else - game_result)
 
     def write_entry(self, fen, score, game_result):
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='little'))

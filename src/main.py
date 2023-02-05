@@ -11,15 +11,15 @@ def main():
     config = dataset.Config(
         training_data = os.path.abspath('games.td'),
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'),
-        num_epochs = 30000,
-        batch_size = 1024,
+        num_epochs = 3000000,
+        batch_size = 2048,
         lambda_ = 0.95,
-        lr = 8e-3,
-        skip_entry_prob = 0.9
+        lr = 6e-3,
+        skip_entry_prob = 0.75
     )
-    # torch.manual_seed(0)
-    # model_ = model.NN().to(config.device)
-    model_ = torch.load('./temp.pt').to(config.device)
+    torch.manual_seed(0)
+    model_ = model.NN().to(config.device)
+    # model_ = torch.load('./temp.pt').to(config.device)
     optimizer = torch.optim.Adagrad(model_.parameters(), config.lr)
 
     for epoch in range(config.num_epochs):
