@@ -82,50 +82,51 @@ class SparseBatch(ctypes.Structure):
 
         return white_features, black_features, stm, score, game_result
 
-lib.create_sparse_batch.restype = ctypes.POINTER(SparseBatch)
-lib.create_sparse_batch.argtypes = [ctypes.c_size_t]
+lib.create_sparse_batch_stream.restype = ctypes.c_void_p
+lib.create_sparse_batch_stream.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_float]
 
-class SparseBatchProvider():
-    def __init__(self, batch_size):
-        self.sparse_batch = lib.create_sparse_batch(batch_size)
+lib.destroy_sparse_batch_stream.argtypes = [ctypes.c_void_p]
 
-    def __del__(self):
-        lib.destroy_sparse_batch(self.sparse_batch)
+lib.next_sparse_batch.restype = ctypes.POINTER(SparseBatch)
+lib.next_sparse_batch.argtypes = [ctypes.c_void_p]
 
-    def __call__(self):
-        return self.sparse_batch
-
-class FixedSizeDataset(torch.utils.data.Dataset):
-    def __init__(self, data, size):
-        super().__init__()
-        self.data = data
-        self.size = size
-    
-    def __len__(self):
-        return self.size
-
-    def __getitem__(self, index):
-        return self.data[0][index], self.data[1][index], self.data[2][index], self.data[3][index], self.data[4][index]
+lib.destroy_sparse_batch.argtypes = [ctypes.c_void_p]
 
 class Config:
-    def __init__(self, batch_size, device):
-        self.batch_size = batch_size
+    def __init__(self, training_data, device, num_epochs, batch_size, lambda_, lr, skip_entry_prob):
+        self.training_data = training_data
         self.device = device
+        self.num_epochs = num_epochs
+        self.batch_size = batch_size
+        self.lambda_ = lambda_
+        self.lr = lr
+        self.skip_entry_prob = skip_entry_prob
 
 class SparseBatchDataset(torch.utils.data.IterableDataset):
     def __init__(self, config):
         super().__init__()
         self.config = config
+        self.stream = lib.create_sparse_batch_stream(
+            ctypes.create_string_buffer(bytes(self.config.training_data, 'utf-8')), 
+            self.config.batch_size,
+            self.config.skip_entry_prob
+        )
+        print('Initialize dataset')
 
     def __iter__(self):
         return self
     
     def __next__(self):
-        sparse_batch_provider = SparseBatchProvider(self.config.batch_size)
+        batch = lib.next_sparse_batch(self.stream)
 
-        if sparse_batch_provider:
-            tensors = sparse_batch_provider().contents.get_tensors(self.config.device)
+        if batch:
+            tensors = batch.contents.get_tensors(self.config.device)
+            lib.destroy_sparse_batch(batch)
             return tensors
         
         else:
             raise StopIteration
+        
+    def __del__(self):
+        lib.destroy_sparse_batch_stream(self.stream)
+        print('Delete dataset')

@@ -1,8 +1,11 @@
 #include<algorithm> // std::sort
 #include<cassert>
+#include<filesystem>
+#include<fstream>
 #include<numeric>
 #include<iostream>
 #include<vector>
+#include<random>
 
 #include"chess/position.h"
 
@@ -180,15 +183,99 @@ struct SparseBatch {
     }
 };
 
+namespace rng {
+    uint64_t seed = 0;
+    std::mt19937_64 gen(seed);
+}
+
 struct SparseBatchStream {
+    size_t batchSize;
+    std::vector<TrainingDataEntry>entries;
+    std::filesystem::path file;
+    size_t fileSize;
+    char* buffer;
+    char* curr;
+    bool stop;
+    float skipEntryProb;
+    std::bernoulli_distribution dist;
 
+    SparseBatchStream(const char* file, size_t batchSize, float skipEntryProb) {
+        this->batchSize = batchSize;
+        this->file = file;
 
-    SparseBatchStream(const char* file, size_t batchSize) {
+        // Open the file.
+        std::ifstream is(this->file, std::ios::binary);
+        assert(is.is_open);
 
+        // Determine the file size.
+        is.seekg(0, std::ios::end);
+        fileSize = is.tellg();
+        is.seekg(0, std::ios::beg);
+
+        buffer = new char[fileSize];
+        is.read(buffer, fileSize);
+        
+        curr = buffer;
+        stop = false;
+
+        this->skipEntryProb = skipEntryProb;
+        dist = std::bernoulli_distribution(skipEntryProb);
     }
 
-    SparseBatch next() {
+    ~SparseBatchStream() {
+        delete[] buffer;
+    }
 
+    SparseBatch* next() {
+        entries.resize(batchSize);
+        for (size_t i = 0; i < batchSize; ++i) {
+            if (stop) return nullptr;
+
+            bool skipEntry = dist(rng::gen);
+            if (skipEntry) readEntry<true>(entries[i]);
+            else           readEntry<false>(entries[i]);
+        }
+        return new SparseBatch(entries);
+    }
+
+    template<bool skipEntry>
+    void readEntry(TrainingDataEntry& e) {
+        if (skipEntry) {
+            if (curr - buffer >= fileSize) {
+                stop = true;
+                return;
+            }
+
+            uint8_t fenSize = *(uint8_t*)curr;
+            curr += 1;
+            const std::string_view fen(curr, fenSize);
+            curr += fenSize + 3;
+
+            readEntry<false>(e);
+        }
+
+        else {
+            if (curr - buffer >= fileSize) {
+                stop = true;
+                return;
+            }
+
+            uint8_t fenSize = *(uint8_t*)curr;
+            curr += 1;
+            const std::string_view fen(curr, fenSize);
+            curr += fenSize;
+
+            if (curr + 3 - buffer >= fileSize) {
+                stop = true;
+                return;
+            }
+
+            e.pos = Position(fen);
+            e.score = *(int16_t*)curr;
+            curr += 2;
+            e.result = *(int8_t*)curr;
+            curr += 1;
+        }
     }
 };
 
@@ -199,31 +286,20 @@ extern "C" {
         Position::init();
     }
 
-    EXPORT SparseBatch* CDECL create_sparse_batch(size_t batchSize) {
-        std::vector<TrainingDataEntry>entries{};
-        for (size_t i = 0; i < batchSize; ++i) {
-            entries.emplace_back();
-            entries[i].pos = Position::startPosition();
-            entries[i].score = 0;
-            entries[i].result = 1;
-        }
-        return new SparseBatch(entries);
-    }
-
-    EXPORT void CDECL destroy_sparse_batch(SparseBatch* batch) {
-        delete batch;
-    }
-
-    EXPORT SparseBatchStream* CDECL create_sparse_batch_stream(const char* file, size_t batchSize) {
-        return new SparseBatchStream(file, batchSize);
+    EXPORT SparseBatchStream* CDECL create_sparse_batch_stream(const char* file, size_t batchSize, float skipEntryProb) {
+        return new SparseBatchStream(file, batchSize, skipEntryProb);
     }
 
     EXPORT void CDECL destroy_sparse_batch_stream(SparseBatchStream* stream) {
         delete stream;
     }
 
-    EXPORT SparseBatch CDECL next_sparse_batch(SparseBatchStream* stream) {
+    EXPORT SparseBatch* CDECL next_sparse_batch(SparseBatchStream* stream) {
         return stream->next();
+    }
+
+    EXPORT void CDECL destroy_sparse_batch(SparseBatch* batch) {
+        delete batch;
     }
 
 } // extern "C"
