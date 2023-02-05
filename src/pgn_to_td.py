@@ -1,4 +1,5 @@
 import argparse
+import chess
 import chess.pgn
 import math
 import os
@@ -47,8 +48,7 @@ class PGN_Converter:
                 return
         
             fen = node.board().fen()
-
-            self.write_entry(fen, score, game_result)
+            self.write_entry(fen, score, game_result if node.turn() == chess.WHITE else - game_result)
 
     def write_entry(self, fen, score, game_result):
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='little'))
