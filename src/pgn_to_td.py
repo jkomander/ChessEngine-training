@@ -31,9 +31,9 @@ class PGN_Converter:
                 self.process_game(game)
             else:
                 break
-            
+
         if (self.numInvalidScores):
-            print('WARNING: Number of invalid scores: {}'.format(self.numInvalidScores))
+            print('WARNING: Number of invalid scores: {}.'.format(self.numInvalidScores))
 
     def process_game(self, game):
         game_result = __class__.game_result(game.headers['Result'])
@@ -46,7 +46,7 @@ class PGN_Converter:
             self.write_entry(fen, score, game_result)
 
     def write_entry(self, fen, score, game_result):
-        if abs(score) > MAX_EVAL_SCORE:
+        if abs(score) > MAX_EVAL_SCORE and abs(score) < MIN_MATE_SCORE or abs(score) > MATE_SCORE:
             self.numInvalidScores += 1
             return
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='big'))
