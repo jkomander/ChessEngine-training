@@ -93,13 +93,14 @@ lib.next_sparse_batch.argtypes = [ctypes.c_void_p]
 lib.destroy_sparse_batch.argtypes = [ctypes.c_void_p]
 
 class Config:
-    def __init__(self, training_data, device, num_epochs, batch_size, lambda_, lr, skip_entry_prob):
+    def __init__(self, training_data, device, num_epochs, batch_size, lambda_, lr, lr_lambda, skip_entry_prob):
         self.training_data = training_data
         self.device = device
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.lambda_ = lambda_
         self.lr = lr
+        self.lr_lambda = lr_lambda
         self.skip_entry_prob = skip_entry_prob
 
 class SparseBatchDataset(torch.utils.data.IterableDataset):

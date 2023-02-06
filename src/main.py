@@ -12,15 +12,16 @@ def main():
         training_data = os.path.abspath('games.td'),
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'),
         num_epochs = 3000000,
-        batch_size = 2048,
-        lambda_ = 0.95,
-        lr = 6e-3,
+        batch_size = 1024,
+        lambda_ = 0.75,
+        lr = 1e-3,
+        # lr_lambda = lambda epoch : 0.1 ** (1/2000),
+        lr_lambda = lambda epoch : 1,
         skip_entry_prob = 0.75
     )
-    torch.manual_seed(0)
-    model_ = model.NN().to(config.device)
-    # model_ = torch.load('./temp.pt').to(config.device)
+    model_ = torch.load('./temp.pt').to(config.device)
     optimizer = torch.optim.Adagrad(model_.parameters(), config.lr)
+    scheduler = torch.optim.lr_scheduler.MultiplicativeLR(optimizer, lr_lambda=config.lr_lambda, verbose=True)
 
     for epoch in range(config.num_epochs):
         begin = time.time()
@@ -44,6 +45,8 @@ def main():
                 print(epoch, i, game_result, score, out * OUTPUT_SCALE, loss, sep='\n')
 
             i += 1
+
+        scheduler.step()
 
         if (epoch+1) % 1 == 0:
             torch.save(model_.cpu(), './temp.pt')
