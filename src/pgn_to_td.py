@@ -40,6 +40,9 @@ class PGN_Converter:
         board = game.board()
 
         for node in game.mainline():
+            if node.comment == 'book':
+                continue
+            
             score = __class__.score(node.comment)
 
             if score == None or abs(score) > MAX_EVAL_SCORE and abs(score) < MIN_MATE_SCORE or abs(score) > MATE_SCORE:

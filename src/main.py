@@ -15,8 +15,8 @@ def main():
         batch_size = 1024,
         lambda_ = 0.75,
         lr = 1e-3,
-        # lr_lambda = lambda epoch : 0.1 ** (1/2000),
-        lr_lambda = lambda epoch : 1,
+        lr_lambda = lambda epoch : 0.1 ** (1/300),
+        # lr_lambda = lambda epoch : 1,
         skip_entry_prob = 0.75
     )
     model_ = torch.load('./temp.pt').to(config.device)
