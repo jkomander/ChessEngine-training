@@ -13,7 +13,7 @@ def main():
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'),
         num_epochs = 3000000,
         batch_size = 1024,
-        lambda_ = 0.75,
+        lambda_ = 0.95,
         lr = 1e-3,
         lr_lambda = lambda epoch : 0.1 ** (1/300),
         # lr_lambda = lambda epoch : 1,
