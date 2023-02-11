@@ -37,7 +37,6 @@ class PGN_Converter:
 
     def process_game(self, game):
         game_result = __class__.game_result(game.headers['Result'])
-        board = game.board()
 
         for node in game.mainline():
             if node.comment == 'book':
@@ -53,6 +52,7 @@ class PGN_Converter:
             self.write_entry(fen, score, game_result if node.parent.turn() == chess.WHITE else - game_result)
 
     def write_entry(self, fen, score, game_result):
+        assert len(fen) < 256
         self.buffer.extend(len(fen).to_bytes(length=1, byteorder='little'))
         self.buffer.extend(bytes(fen, 'utf-8'))
         self.buffer.extend(score.to_bytes(length=2, byteorder='little', signed=True))

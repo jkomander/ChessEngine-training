@@ -13,10 +13,9 @@ def main():
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'),
         num_epochs = 3000000,
         batch_size = 1024,
-        lambda_ = 0.95,
-        lr = 1e-3,
+        lambda_ = 0.75,
+        lr = 1e-2,
         lr_lambda = lambda epoch : 0.1 ** (1/300),
-        # lr_lambda = lambda epoch : 1,
         skip_entry_prob = 0.75
     )
     model_ = torch.load('./temp.pt').to(config.device)
