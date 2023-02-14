@@ -1,5 +1,5 @@
+import argparse
 import numpy as np
-import os
 import time
 import torch
 
@@ -8,17 +8,28 @@ import dataset
 import model
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train', type=str, help='Training data (.td)')
+    parser.add_argument('--net', type=str)
+    parser.add_argument('--num_epochs', type=int, default=100)
+    parser.add_argument('--batch_size', type=int, default=1024)
+    parser.add_argument('--lambda_', type=float, default=0.75)
+    parser.add_argument('--lr', type=float, default=4e-2)
+    parser.add_argument('--gamma', type=float, default=0.1**(1/50))
+    parser.add_argument('--skip_entry_prob', type=float, default=0.75)
+    args = parser.parse_args()
+
     config = dataset.Config(
-        training_data = os.path.abspath('games.td'),
+        training_data = args.train,
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'),
-        num_epochs = 3000000,
-        batch_size = 1024,
-        lambda_ = 0.75,
-        lr = 1e-2,
-        lr_lambda = lambda epoch : 0.1 ** (1/300),
-        skip_entry_prob = 0.75
+        num_epochs = args.num_epochs,
+        batch_size = args.batch_size,
+        lambda_ = args.lambda_,
+        lr = args.lr,
+        lr_lambda = lambda epoch : args.gamma,
+        skip_entry_prob = args.skip_entry_prob
     )
-    model_ = torch.load('./temp.pt').to(config.device)
+    model_ = torch.load(args.net).to(config.device)
     optimizer = torch.optim.Adagrad(model_.parameters(), config.lr)
     scheduler = torch.optim.lr_scheduler.MultiplicativeLR(optimizer, lr_lambda=config.lr_lambda, verbose=True)
 
@@ -48,7 +59,7 @@ def main():
         scheduler.step()
 
         if (epoch+1) % 1 == 0:
-            torch.save(model_.cpu(), './temp.pt')
+            torch.save(model_.cpu(), args.net)
         model_.to(config.device)
         
         end = time.time()
