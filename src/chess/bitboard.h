@@ -82,6 +82,7 @@ namespace chess {
 			Bitboard copy(data);
 			copy.mirror();
 			return copy;
+		}
 #endif
 
 		Square popLSB() {
