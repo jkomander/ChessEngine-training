@@ -5,6 +5,7 @@
 #include<fstream>
 #include<iostream>
 #include<string>
+#include<vector>
 
 #include"pgn_position.h"
 
@@ -16,6 +17,7 @@ namespace chess {
 		std::vector<char>buffer;
 		PGN_Position position;
 		int8_t gameResult;
+		bool isComment;
 
 		PGN_Converter(
 			std::filesystem::path pgn,
@@ -27,6 +29,7 @@ namespace chess {
 			std::ifstream is(pgn);
 			assert(is.is_open());
 			std::string line;
+			isComment = false;
 
 			size_t i = 0;
 			while (std::getline(is, line)) {
@@ -57,7 +60,29 @@ namespace chess {
 				for (; idx < line.size();) {
 					size_t spaceIdx = line.find_first_of(' ', idx);
 					size_t len = spaceIdx == std::string_view::npos ? line.size() - idx : spaceIdx - idx;
-					std::cout << line.substr(idx, len) << std::endl;
+
+					if (line[idx] == '{')
+						isComment = true;
+
+					// comment
+					if (isComment) {
+
+					}
+
+					// move count
+					else if (line[idx+len-1] == '.') {
+						idx += len + 1;
+						continue;
+					}
+
+					// move
+					else {
+						std::cout << line.substr(idx, len) << std::endl;
+					}
+
+					if (line[idx+len-1] == '}')
+						isComment = false;
+
 					idx += len + 1;
 				}
 			}
