@@ -72,7 +72,7 @@ namespace FeatureTransformer {
 
                             if (pc == piece::make(c, KING) ||
                                 psq == ksq ||
-                                pc == piece::make(!c, KING) && distance(psq, ksq) == 1 ||
+                                pc == piece::make(!c, KING) && square::distance(psq, ksq) == 1 ||
                                 pt == PAWN && (RANK_1_BB | RANK_8_BB).isSet(psq))
                                 continue;
 
@@ -96,7 +96,7 @@ namespace FeatureTransformer {
         const Position& pos = e.pos;
 
         Square ksq = pos.kingSquare(c);
-        Bitboard occupied = pos.occupied & ~Bitboard::fromSqure(ksq);
+        Bitboard occupied = pos.occupied & ~Bitboard::fromSquare(ksq);
 
         IndexType active[MAX_ACTIVE_FEATURES];
         IndexType size = 0;

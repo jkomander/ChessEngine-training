@@ -45,7 +45,7 @@ namespace chess {
 		inline static FenTableEntry fenTable[128];
 
 		Position() = default;
-		Position(const std::string_view& fen);
+		Position(std::string_view fen);
 
 		static Position startPosition() {
 			return Position(startFEN);
@@ -100,7 +100,7 @@ namespace chess {
 		fenTable['/'] = { false, {}, 2 * SOUTH };
 	}
 
-	Position::Position(const std::string_view& fen) {
+	Position::Position(std::string_view fen) {
 
 		std::memset(this, 0, sizeof(Position));
 		uint16_t idx = 0;
@@ -150,7 +150,7 @@ namespace chess {
 
 		// en passant target square
 		if (fen[idx] != '-') {
-			epSquare = square::make(file::CHARS[idx++], rank::CHARS[idx++]);
+			epSquare = square::make(file::CHAR_IDENTIFYERS[idx++], rank::CHAR_IDENTIFYERS[idx++]);
 		}
 
 		idx += 2;

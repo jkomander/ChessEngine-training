@@ -10,6 +10,7 @@ namespace chess {
 	using Square = uint8_t;
 	using File = uint8_t;
 	using Rank = uint8_t;
+	using Direction = int8_t;
 
 	enum Colors {
 		WHITE,
@@ -112,18 +113,12 @@ namespace chess {
 		}
 	}
 
-	namespace square {
-		constexpr Square make(File file, Rank rank) {
-			return (rank << 3) + file;
-		}
-	}
-
 	namespace file {
 		constexpr File make(Square sq) {
 			return sq & 7;
 		}
 
-		char CHARS[N_FILES] = { 'a','b','c','d','e','f','g','h' };
+		char CHAR_IDENTIFYERS[N_FILES] = { 'a','b','c','d','e','f','g','h' };
 	}
 
 	namespace rank {
@@ -131,11 +126,24 @@ namespace chess {
 			return sq >> 3;
 		}
 
-		char CHARS[N_RANKS] = { '1','2','3','4','5','6','7','8' };
+		char CHAR_IDENTIFYERS[N_RANKS] = { '1','2','3','4','5','6','7','8' };
 	}
 
-	inline uint8_t distance(Square s1, Square s2) {
-		return std::max(std::abs(file::make(s1) - file::make(s2)), std::abs(rank::make(s1) - rank::make(s2)));
+	namespace square {
+		constexpr Square make(File file, Rank rank) {
+			return (rank << 3) + file;
+		}
+
+		constexpr bool isValid(Square sq) {
+			return sq >= A1 && sq <= H8;
+		}
+
+		inline uint8_t distance(Square s1, Square s2) {
+			return std::max(
+				std::abs(file::make(s1) - file::make(s2)),
+				std::abs(rank::make(s1) - rank::make(s2))
+			);
+		}
 	}
 
 } // namespace chess

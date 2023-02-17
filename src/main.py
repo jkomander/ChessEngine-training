@@ -1,5 +1,4 @@
 import argparse
-import numpy as np
 import time
 import torch
 
@@ -11,11 +10,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train', type=str, help='Training data (.td)')
     parser.add_argument('--net', type=str)
-    parser.add_argument('--num_epochs', type=int, default=100)
+    parser.add_argument('--num_epochs', type=int, default=40)
     parser.add_argument('--batch_size', type=int, default=1024)
     parser.add_argument('--lambda_', type=float, default=0.75)
-    parser.add_argument('--lr', type=float, default=4e-2)
-    parser.add_argument('--gamma', type=float, default=0.1**(1/50))
+    parser.add_argument('--lr', type=float, default=1e-2)
+    parser.add_argument('--gamma', type=float, default=0.1**(1/35))
     parser.add_argument('--skip_entry_prob', type=float, default=0.75)
     args = parser.parse_args()
 
@@ -60,6 +59,8 @@ def main():
 
         if (epoch+1) % 1 == 0:
             torch.save(model_.cpu(), args.net)
+        if (epoch+1) % 5 == 0:
+            torch.save(model_.cpu(), f'C:\\Users\\jacki\\source\\repos\\jkomander\\ChessEngine-training\\src\\temp{epoch+1}.pt')
         model_.to(config.device)
         
         end = time.time()
