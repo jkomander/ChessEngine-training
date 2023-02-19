@@ -24,6 +24,12 @@ namespace chess {
 		};
 	};
 
+	struct FenTableEntry {
+		bool setPiece;
+		Piece piece;
+		int8_t skip;
+	};
+
 	struct Position {
 		Piece board[N_SQUARES];
 		Square ksq[N_COLORS];
@@ -34,21 +40,14 @@ namespace chess {
 		uint8_t rule50Cnt;
 		uint16_t ply;
 
-		inline const static std::string startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-		
-		struct FenTableEntry {
-			bool setPiece;
-			Piece piece;
-			int8_t skip;
-		};
-
+		inline const static std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 		inline static FenTableEntry fenTable[128];
 
 		Position() = default;
 		Position(std::string_view fen);
 
 		static Position startPosition() {
-			return Position(startFEN);
+			return Position(START_FEN);
 		}
 
 		static void init();

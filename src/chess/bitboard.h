@@ -156,6 +156,8 @@ namespace chess {
 		constexpr explicit operator bool() const {
 			return data;
 		}
+
+		friend std::ostream& operator<<(std::ostream& os, Bitboard b);
 	};
 
 	constexpr Bitboard FILE_A_BB(0x0101010101010101);
@@ -190,6 +192,17 @@ namespace chess {
 		else if (d == SOUTHEAST) return (b >> NORTHWEST) - FILE_A_BB;
 		else if (d == SOUTHWEST) return (b >> NORTHEAST) - FILE_H_BB;
 		else return {};
+	}
+
+	std::ostream& operator<<(std::ostream& os, Bitboard b) {
+		for (Rank r = RANK_8; r >= RANK_1; --r) {
+			for (File f = FILE_A; f <= FILE_H; ++f) {
+				Square sq = square::make(f, r);
+				os << (b.isSet(sq) ? 'X' : '.') << ' ';
+			}
+			os << '\n';
+		}
+		return os;
 	}
 
 } // namespace chess

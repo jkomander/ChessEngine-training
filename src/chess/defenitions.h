@@ -8,9 +8,10 @@ namespace chess {
 	using PieceType = uint8_t;
 	using Piece = uint8_t;
 	using Square = uint8_t;
-	using File = uint8_t;
-	using Rank = uint8_t;
+	using File = int8_t;
+	using Rank = int8_t;
 	using Direction = int8_t;
+	using Score = int16_t;
 
 	enum Colors {
 		WHITE,
@@ -95,6 +96,10 @@ namespace chess {
 		N_DIRECTIONS = 8
 	};
 
+	enum Scores {
+		MATE_SCORE = 32000
+	};
+
 	namespace color {
 		constexpr Color make(Piece pc) {
 			return pc >> 3;
@@ -111,11 +116,17 @@ namespace chess {
 		constexpr Piece make(Color c, PieceType pt) {
 			return (c << 3) + pt;
 		}
+
+		const std::string PIECE_TO_CHAR = " PNBRQK  pnbrqk";
 	}
 
 	namespace file {
 		constexpr File make(Square sq) {
 			return sq & 7;
+		}
+
+		constexpr Square fromChar(char c) {
+			return c - 'a';
 		}
 
 		char CHAR_IDENTIFYERS[N_FILES] = { 'a','b','c','d','e','f','g','h' };
@@ -126,6 +137,10 @@ namespace chess {
 			return sq >> 3;
 		}
 
+		constexpr Square fromChar(char c) {
+			return c - '1';
+		}
+
 		char CHAR_IDENTIFYERS[N_RANKS] = { '1','2','3','4','5','6','7','8' };
 	}
 
@@ -134,6 +149,14 @@ namespace chess {
 			return (rank << 3) + file;
 		}
 
+		constexpr Square make(std::string_view sv) {
+			return square::make(File(sv[0] - 'a'), Rank(sv[1] - '1'));
+		}
+
+		inline std::string toString(Square sq) {
+			return std::string(1, file::CHAR_IDENTIFYERS[file::make(sq)]) +
+				std::string(1, rank::CHAR_IDENTIFYERS[rank::make(sq)]);
+		}
 		constexpr bool isValid(Square sq) {
 			return sq >= A1 && sq <= H8;
 		}
@@ -143,6 +166,16 @@ namespace chess {
 				std::abs(file::make(s1) - file::make(s2)),
 				std::abs(rank::make(s1) - rank::make(s2))
 			);
+		}
+
+		constexpr Square relative(Color c, Square sq) { 
+			return c ? sq ^ A8 : sq;
+		}
+	}
+
+	namespace direction {
+		constexpr Direction pawnPush(Color c) {
+			return c ? SOUTH : NORTH;
 		}
 	}
 
