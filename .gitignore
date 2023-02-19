@@ -1,2 +1,8 @@
 /src/build
 /src/__pycache__
+/src/PGN-converter/.vs
+/src/PGN-converter/x64
+src/PGN-converter/PGN-converter.sln
+src/PGN-converter/PGN-converter.vcxproj
+src/PGN-converter/PGN-converter.vcxproj.filters
+src/PGN-converter/PGN-converter.vcxproj.user
