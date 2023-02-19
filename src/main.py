@@ -102,6 +102,7 @@ def main():
         subprocess.run(command, shell=True)
 
         command = ' '.join([
+            f'cd {os.path.join(training_repos_src)} &',
             os.path.join(training_repos_src, 'train.py'),
             f'--train={train}',
             f'--net={net}',
@@ -109,7 +110,7 @@ def main():
             f'--batch_size={args.batch_size}',
             f'--lambda_={args.lambda_}',
             f'--lr={args.lr}',
-            f'--gamma={args.gamme}',
+            f'--gamma={args.gamma}',
             f'--skip_entry_prob={args.skip_entry_prob}'
         ])
         subprocess.run(command, shell=True)
