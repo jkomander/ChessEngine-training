@@ -131,11 +131,10 @@ namespace chess {
 									sizeof(uint8_t) + fenSize + sizeof(Score) + sizeof(int8_t)
 								);
 
-								buffer[offset] = fenSize;
-								++offset;
+								buffer[offset++] = fenSize;
 								std::memcpy(&buffer[offset], fen.data(), fenSize);
 								offset += fenSize;
-								buffer[offset] = score;
+								std::memcpy(&buffer[offset], &score, sizeof(Score));
 								offset += sizeof(Score);
 								buffer[offset] = relativeGameResult;
 							}
